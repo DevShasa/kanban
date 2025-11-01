@@ -1,13 +1,9 @@
-
+import KanbanBoard from "./components/KanbanBoard"
 
 function App() {
 
   return (
-    <>
-      <div className={"p-4"}>
-        Wolan
-      </div>
-    </>
+    <KanbanBoard />
   )
 }
 
