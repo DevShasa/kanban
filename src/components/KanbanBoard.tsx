@@ -63,13 +63,14 @@ const KanbanBoard = () => {
 
 	return (
 		<div
-			className={`m-auto flex min-h-screen w-full items-center overflow-x-auto overflow-y-hidden px-[40px]`}
+			className={`m-auto flex min-h-screen w-full items-center overflow-x-auto overflow-y-hidden px-10`}
 		>
 			<div className={`m-auto flex gap-4`}>
                 <div className="flex gap-4">
                     {columns.map(c=>(<ColumnContainer
                         column={c}
                         deleteColumn={deleteColumn}
+                        key={c.id}
                     />))}
                 </div>
 				<button
