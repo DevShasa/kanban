@@ -1,13 +1,18 @@
 import PlusIcon from "../icons/PlusIcon";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { type Column, type Id, type Task } from "../types";
 import ColumnContainer from "./ColumnContainer";
+import { DndContext, DragOverlay, type DragStartEvent } from "@dnd-kit/core";
+import { SortableContext } from "@dnd-kit/sortable";
+import { createPortal } from "react-dom";
 
 const KanbanBoard = () => {
 	const [columns, setColumns] = useState<Column[]>([]);
 	const [activeColumn, setActiveColumn] = useState<Column | null>(null);
 	const [activeTask, setActiveTask] = useState<Task | null>(null);
 	const [tasks, setTasks] = useState<Task[]>([]);
+	const columnsId = useMemo(()=> columns.map(col=> col.id), [columns])
+
 
 	function generateId() {
 		return Math.floor(Math.random() * 1000) + 1;
@@ -61,27 +66,52 @@ const KanbanBoard = () => {
 		setTasks(newTasks);
 	}
 
+	function onDragStart(event:DragStartEvent){
+		console.log("DRAG STARTING --->", event)
+		if(event.active.data.current?.type === "Column"){
+			setActiveColumn(event.active.data.current.column)
+			return
+		}
+	}
+
+
 	return (
 		<div
 			className={`m-auto flex min-h-screen w-full items-center overflow-x-auto overflow-y-hidden px-10`}
 		>
-			<div className={`m-auto flex gap-4`}>
-                <div className="flex gap-4">
-                    {columns.map(c=>(<ColumnContainer
-                        column={c}
-                        deleteColumn={deleteColumn}
-                        key={c.id}
-                    />))}
-                </div>
-				<button
-					className={`h-[60px] w-[350px] min-w-[350px] cursor-pointer rounded-lg bg-mainBacgroundcolor border-2 border-columnBackgroundColor p-4 ring-rose-500 hover:ring-2 flex gap-2`}
-					onClick={() => {
-						createNewColumn();
-					}}
-				>
-					<PlusIcon /> Add column
-				</button>
-			</div>
+			<DndContext onDragStart={onDragStart}>
+				<div className={`m-auto flex gap-4`}>
+					<div className="flex gap-4">
+						<SortableContext items={columnsId}>
+							{columns.map(c=>(<ColumnContainer
+								column={c}
+								deleteColumn={deleteColumn}
+								key={c.id}
+							/>))}
+						</SortableContext>
+
+					</div>
+					<button
+						className={`h-[60px] w-[350px] min-w-[350px] cursor-pointer rounded-lg bg-mainBacgroundcolor border-2 border-columnBackgroundColor p-4 ring-rose-500 hover:ring-2 flex gap-2`}
+						onClick={() => {
+							createNewColumn();
+						}}
+					>
+						<PlusIcon /> 27:32Add column
+					</button>
+				</div>
+
+
+
+				{
+					createPortal(
+						<DragOverlay>
+							{activeColumn && <ColumnContainer column={activeColumn} deleteColumn={deleteColumn}/>}
+						</DragOverlay>, 
+						document.body
+					)
+				}
+			</DndContext>
 		</div>
 	);
 };
